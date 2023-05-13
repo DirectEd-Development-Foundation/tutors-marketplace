@@ -1,0 +1,24 @@
+{
+  "name": "tutors-marketplace",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./contract/scriptCompiler.js",
+  "scripts": {
+    "watch": "nodemon --watch ./ --ext '*'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DirectEd-Development-Foundation/tutors-marketplace.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DirectEd-Development-Foundation/tutors-marketplace/issues"
+  },
+  "homepage": "https://github.com/DirectEd-Development-Foundation/tutors-marketplace#readme",
+  "dependencies": {
+    "@hyperionbt/helios": "^0.13.37"
+  }
+}
