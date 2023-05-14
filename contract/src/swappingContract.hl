@@ -16,7 +16,7 @@ func main(_, redeemer: Redeemer, ctx: ScriptContext) -> Bool {
     djedCoin: AssetClass = AssetClass::new(djedMintingPolicy, "DJED".encode_utf8());
 
     // define token asset
-    token: AssetClass = AssetClass::new(TokenPolicyId, TokenName.encode_utf8());
+    token: AssetClass = AssetClass::new(TokenPolicyId, TokenName);
 
     // get amount of token being send to script
     tx: Tx = ctx.tx;
