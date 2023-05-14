@@ -1,4 +1,4 @@
-spending my_validator       
+spending swapping_contract_validator      
 
 enum Redeemer {
     ConsumeDjed
