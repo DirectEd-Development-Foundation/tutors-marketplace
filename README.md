@@ -2,4 +2,7 @@
 
 ## Deploy Contract Using Helios 
 
-Install Helios CLI `sudo npm install -g @hyperionbt/helios-cli`
+Install Helios CLI </br>
+`sudo npm install -g @hyperionbt/helios-cli`
+
+
