@@ -1,0 +1,61 @@
+spending my_validator       
+
+enum Redeemer {
+    ConsumeDjed
+}
+
+// The parameters of the script
+// The policy id and the token name of the token used to redeem djed.
+const TokenPolicyId = MintingPolicyHash::new(#)
+const TokenName = #
+
+// Main function
+func main(_, redeemer: Redeemer, ctx: ScriptContext) -> Bool {
+    // define djed asset
+    djedMintingPolicy: MintingPolicyHash = MintingPolicyHash::new("fc80e6f497170399a302fa39ff2a4d6871c7de41082e63156de393b7".encode_utf8());
+    djedCoin: AssetClass = AssetClass::new(djedMintingPolicy, "DJED".encode_utf8());
+
+    // define token asset
+    token: AssetClass = AssetClass::new(djedMintingPolicy, "DJED".encode_utf8());
+
+    // get amount of token being send to script
+    tx: Tx = ctx.tx;
+    txOutputs: []TxOutput = tx.outputs;
+    txOutputSendToScript: []TxOutput = txOutputs.filter((o: TxOutput) -> Bool { 
+        o.ref_script_hash.switch{
+            Some{some} => {
+                ValidatorHash::from_script_hash(some) == ctx.get_current_validator_hash()
+            },
+            None => {
+                false
+            }
+        }
+    });
+    tokenSendToScript: Int = txOutputSendToScript.fold((acc: Int, output: TxOutput) -> {
+        qty: Int = output.value.get_safe(token);
+        acc + qty
+      }, 0);
+
+    // get total amount of djed being consumed
+    cosumedInput: TxInput = ctx.get_current_input();
+    totalDjedConsumed: Int = cosumedInput.output.value.get_safe(djedCoin);
+
+    // get change amount of djed being returned back to script
+    txBackToScript: []TxOutput = ctx.get_cont_outputs();
+    djedBackToScript: Int = txBackToScript.fold((prev: Int, output: TxOutput) -> {
+        qty: Int = output.value.get_safe(djedCoin);
+        prev + qty
+      }, 0);
+
+    
+    redeemer.switch{
+        ConsumeDjed => {
+            // total djed consumed in transaction - amount token send to script 
+            // = amount of djed that is returned back to the script
+            totalDjedConsumed - tokenSendToScript == djedBackToScript
+        },
+        _ => {
+            false
+        }
+    }
+}
