@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/DirectEd-Development-Foundation/tutors-marketplace#readme",
   "dependencies": {
-    "@hyperionbt/helios": "^0.13.37"
+    "@hyperionbt/helios": "^0.13.37",
+    "deno": "^0.1.1"
   }
 }
