@@ -46,8 +46,8 @@ const ConsumeDjed = Data.Object({
 type ConsumeDjedType = Data.Static<typeof ConsumeDjed>;
 
 // Token Policy ID and Name for testtoken
-const testTokenPolicyId = "d365ad6a86fe81ed303eab00fc46031e88879166f7d26a271a553009";
-const testTokenName = "445456";
+const testTokenPolicyId = "a1deebd26b685e6799218f60e2cad0a80928c4145d12f1bf49aebab5";
+const testTokenName = "31";
 
 
 async function logAvailableUTxOs() {
@@ -70,7 +70,7 @@ async function findUTxOsByPolicyAndName(walletAddress: Address, policyId: string
 
         // Filter UTxOs that contain the specified token asset with the given policy ID and token name
         const filteredUTxOs = utxos.filter((utxo) => {
-            const tokenAsset = utxo.assets[policyId]?.[tokenName];
+            const tokenAsset = utxo.assets[policyId+tokenName];
             return tokenAsset !== undefined;
         });
 
@@ -86,6 +86,9 @@ async function swapTestTokenForDJED(testTokenAmount: bigint) {
     try {
         const walletAddress = await lucid.wallet.address();
         const testTokenUTxOs = await findUTxOsByPolicyAndName(walletAddress, testTokenPolicyId, testTokenName);
+        const vestingUtxos = await lucid.utxosAt(vestingAddress);
+        const redeemer = Data.to(ConsumeDjed);
+        
 
         if (testTokenUTxOs.length === 0) {
             console.log("No UTxOs with testtoken asset found.");
@@ -98,21 +101,21 @@ async function swapTestTokenForDJED(testTokenAmount: bigint) {
             purpose: "Swapping testtoken for DJED",
         };
 
+
         // Create a new transaction builder
         const txBuilder = lucid.newTx();
 
+        txBuilder.collectFrom(vestingUtxos, redeemer)
+
         // Add the testtoken UTxOs as inputs to the transaction
-        txBuilder.addInputs(testTokenUTxOs);
+        txBuilder.collectFrom(testTokenUTxOs);
+
+        // Attach validator
+        txBuilder.attachSpendingValidator(vestingScript)
 
         // Add the output to send DJED to the contract address
-        txBuilder.addOutput({
-            address: vestingAddress,
-            amount: { lovelace: 0, assets: [{ policyId: "djedMintingPolicy", name: "DJED", quantity: testTokenAmount }] },
-            datum: Data.to(consumeDjedData, ConsumeDjed),
-        });
 
-        // Sign the transaction with the wallet's key
-        txBuilder.addSignerKey(walletAddress);
+        txBuilder.payToAddress(vestingAddress, { ["9772ff715b691c0444f333ba1db93b055c0864bec48fff92d1f2a7fe" + "446a65645f746573744d6963726f555344"]: testTokenAmount })
 
         // Complete the transaction
         const tx = await txBuilder.complete();
